@@ -3,127 +3,757 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Live View</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Daily Lifestyle App - Pallab Chakraborty</title>
     <style>
-        body { font-family: sans-serif; background: #f3f4f6; text-align: center; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .box { background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; }
-        .value { font-size: 2rem; font-weight: bold; color: #4f46e5; }
-        .btn-login { background: #DB4437; color: white; border: none; padding: 10px 20px; font-size: 1rem; cursor: pointer; border-radius: 4px; }
+        :root {
+            --primary: #2c3e50;
+            --secondary: #27ae60;
+            --accent: #e67e22;
+            --bg: #f4f6f7;
+            --text: #333;
+            --white: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        /* Header & Nav */
+        header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .balance-display {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #34495e;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        nav button:hover, nav button.active {
+            background-color: var(--secondary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            min-height: 80vh;
+        }
+
+        .section {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s;
+        }
         
-        #app-view { display: none; }
-        #login-view { display: block; margin-top: 100px; }
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h2 { border-bottom: 2px solid var(--secondary); padding-bottom: 10px; color: var(--primary); }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .form-row > div {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        
+        input, select, button.action-btn {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button.action-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button.action-btn:hover { background-color: #219150; }
+        
+        button.delete-btn {
+            background-color: #c0392b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th { background-color: var(--primary); color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+
+        /* Diet Chart */
+        .diet-item {
+            background: #e8f8f5;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .diet-info strong { display: block; color: var(--primary); font-size: 1.1rem; }
+        .diet-info span { color: #555; font-size: 0.9rem; }
+        
+        .diet-status input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .diet-status.done {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        /* Images */
+        .thumb-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Data Controls */
+        .data-controls {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eee;
+            border-radius: 5px;
+        }
+        
+        .notification-banner {
+            background-color: var(--accent);
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 0.8rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
-    <div id="login-view">
-        <h1>PharmaCare User Login</h1>
-        <button id="loginBtn" class="btn-login">Sign in with Google</button>
+<div class="notification-banner" id="notifBanner">Enable notifications for diet alerts!</div>
+
+<header>
+    <h1>Daily Lifestyle App</h1>
+    <div>User: <strong>Pallab Chakraborty</strong> (Age 27+)</div>
+    <div class="balance-display">Balance: <span id="totalBalance">0.00</span></div>
+</header>
+
+<nav>
+    <button onclick="showSection('credit')" class="active">Credits (Income)</button>
+    <button onclick="showSection('debit')">Daily Purchase</button>
+    <button onclick="showSection('diet')">Healthy Diet</button>
+    <button onclick="showSection('data')">Data & Settings</button>
+</nav>
+
+<div class="container">
+
+    <!-- CREDIT SECTION -->
+    <div id="credit" class="section active">
+        <h2>Credit Management</h2>
+        <div class="form-group">
+            <div class="form-row">
+                <div>
+                    <label>Category</label>
+                    <select id="creditCategory" onchange="toggleCreditFields()">
+                        <option value="Salary">Salary</option>
+                        <option value="Incentive">Incentive</option>
+                        <option value="Ownership">Ownership Amount</option>
+                        <option value="Membership">Membership Amount</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Amount</label>
+                    <input type="number" id="creditAmount" placeholder="0.00">
+                </div>
+                <div>
+                    <label>Date</label>
+                    <input type="date" id="creditDate">
+                </div>
+            </div>
+            <!-- Dynamic Fields for Membership -->
+            <div class="form-row" id="membershipFields" style="display:none; margin-top:10px;">
+                <div>
+                    <label>Month of Year</label>
+                    <input type="month" id="memMonth">
+                </div>
+                <div>
+                    <label>Quantity</label>
+                    <input type="number" id="memQty" placeholder="1">
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:10px">
+                <label>Description/Note</label>
+                <input type="text" id="creditNote" placeholder="Additional details...">
+            </div>
+            <button class="action-btn" onclick="addCredit()">Add Credit</button>
+        </div>
+
+        <h3>Credit History</h3>
+        <div class="table-responsive">
+            <table id="creditTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Details (Month/Qty)</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody><!-- Data loads here --></tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- MAIN APP -->
-    <div id="app-view" class="container">
-        <div style="display:flex; justify-content:space-between;">
-            <h3>Live Dashboard</h3>
-            <button onclick="doLogout()">Logout</button>
-        </div>
-        <p style="color:gray;">Showing data for Date: <span id="todayDate"></span></p>
-
-        <div class="grid">
-            <div class="box">
-                <h3>Total Sales (Today)</h3>
-                <div class="value" id="dispSales">₹0</div>
+    <!-- DEBIT/PURCHASE SECTION -->
+    <div id="debit" class="section">
+        <h2>Daily Purchase (Expenses)</h2>
+        <div class="form-group">
+            <div class="form-row">
+                <div>
+                    <label>Product Name</label>
+                    <input type="text" id="debName" placeholder="Item Name">
+                </div>
+                <div>
+                    <label>Purchase From (Shop)</label>
+                    <input type="text" id="debSource" placeholder="Shop Name">
+                </div>
             </div>
-            <div class="box">
-                <h3>Pending Deliveries</h3>
-                <div class="value" id="dispDelivery">0</div>
+            <div class="form-row" style="margin-top:10px">
+                <div>
+                    <label>Quantity</label>
+                    <input type="number" id="debQty" placeholder="1">
+                </div>
+                <div>
+                    <label>Price</label>
+                    <input type="number" id="debPrice" placeholder="0.00">
+                </div>
+                <div>
+                    <label>Date</label>
+                    <input type="date" id="debDate">
+                </div>
             </div>
+            <div class="form-group" style="margin-top:10px">
+                <label>Upload Image</label>
+                <input type="file" id="debImg" accept="image/*">
+                <small style="color:red">Note: Large images may fill storage quickly.</small>
+            </div>
+            <button class="action-btn" onclick="addDebit()">Add Purchase</button>
         </div>
 
-        <canvas id="chart" height="200"></canvas>
-
-        <hr>
-        <h4 style="text-align:left;">Live Data Feed (Debugging):</h4>
-        <ul id="debugList" style="text-align:left; font-size: 0.9rem; color: #555;">
-            <li>Waiting for data...</li>
-        </ul>
+        <h3>Purchase History</h3>
+        <button onclick="exportToCSV('debit')" style="margin-bottom:10px; background:#27ae60; color:white; border:none; padding:5px 10px; cursor:pointer;">Export Purchases to Excel</button>
+        <div class="table-responsive">
+            <table id="debitTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Source</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Image</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody><!-- Data loads here --></tbody>
+            </table>
+        </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <!-- DIET SECTION -->
+    <div id="diet" class="section">
+        <h2>Healthy Food Chart (Pallab Chakraborty)</h2>
+        <p>Age 27+ | Health Maintenance | <button onclick="requestNotificationPermission()" style="padding:5px; cursor:pointer;">Enable Alerts</button></p>
+        
+        <div id="dietList">
+            <!-- Diet items load here -->
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAa0daulla1tDS_y4CexvEdriuz6LHjxPo",
-            authDomain: "fooddelivery-73252.firebaseapp.com",
-            projectId: "fooddelivery-73252",
-            storageBucket: "fooddelivery-73252.firebasestorage.app",
-            messagingSenderId: "551858740314",
-            appId: "1:551858740314:web:ca7fbd9a47e96d34c50c63"
+        <h3>Add/Upgrade Food Item</h3>
+        <div class="form-row">
+            <div>
+                <label>Time (24h)</label>
+                <input type="time" id="dietTime">
+            </div>
+            <div>
+                <label>Food Item Name</label>
+                <input type="text" id="dietName" placeholder="e.g. Green Tea & Almonds">
+            </div>
+        </div>
+        <button class="action-btn" onclick="addDietItem()">Add to Chart</button>
+    </div>
+
+    <!-- DATA SECTION -->
+    <div id="data" class="section">
+        <h2>Data Management</h2>
+        
+        <div class="data-controls">
+            <h3>Export Data</h3>
+            <p>Download your data as Excel-compatible CSV files.</p>
+            <div class="form-row">
+                <button class="action-btn" onclick="exportToCSV('credit')">Export Credits</button>
+                <button class="action-btn" onclick="exportToCSV('debit')">Export Purchases</button>
+                <button class="action-btn" onclick="exportToCSV('diet')">Export Diet Chart</button>
+            </div>
+        </div>
+
+        <div class="data-controls" style="margin-top:20px; border-top: 2px solid #ccc;">
+            <h3>Import Data</h3>
+            <p>Restore data from a previously exported CSV file. <br><small><strong>Warning:</strong> This will append to current data. Clear data first if you want a clean restore.</small></p>
+            
+            <div class="form-group">
+                <label>Select CSV File</label>
+                <input type="file" id="importFile" accept=".csv">
+            </div>
+            <div class="form-row">
+                <div>
+                    <label>Import As:</label>
+                    <select id="importType">
+                        <option value="credit">Credits</option>
+                        <option value="debit">Purchases</option>
+                    </select>
+                </div>
+                <button class="action-btn" onclick="importData()">Import Now</button>
+            </div>
+        </div>
+
+        <div class="data-controls" style="background: #fadbd8; margin-top: 20px;">
+            <h3>Danger Zone</h3>
+            <button class="delete-btn" style="width:100%; padding:15px;" onclick="clearAllData()">WIPE ALL DATA</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    let appData = {
+        credits: [],
+        debits: [],
+        diet: [
+            { id: 1, time: '07:00', name: 'Warm Water + Lemon + Honey', done: false },
+            { id: 2, time: '08:30', name: 'Oats / 2 Boiled Eggs / Brown Bread', done: false },
+            { id: 3, time: '11:00', name: 'Seasonal Fruit (Apple/Papaya)', done: false },
+            { id: 4, time: '13:30', name: 'Rice/Roti, Dal, Green Veggies, Fish/Chicken', done: false },
+            { id: 5, time: '17:00', name: 'Green Tea + Roasted Chana/Nuts', done: false },
+            { id: 6, time: '20:30', name: 'Roti + Veg Curry / Soup (Light Dinner)', done: false },
+            { id: 7, time: '22:00', name: 'Warm Milk (Turmeric optional)', done: false }
+        ]
+    };
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        loadData();
+        
+        // Set Default Dates to Today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('creditDate').value = today;
+        document.getElementById('debDate').value = today;
+        
+        // Start Timer for Notifications
+        setInterval(checkDietTime, 60000); // Check every minute
+    };
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        
+        document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function saveData() {
+        localStorage.setItem('pallabLifestyleApp', JSON.stringify(appData));
+        renderAll();
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('pallabLifestyleApp');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Merge defaults for diet if needed, or just load
+            appData.credits = parsed.credits || [];
+            appData.debits = parsed.debits || [];
+            if(parsed.diet && parsed.diet.length > 0) appData.diet = parsed.diet;
+        }
+        renderAll();
+    }
+
+    function renderAll() {
+        renderCredits();
+        renderDebits();
+        renderDiet();
+        updateBalance();
+    }
+
+    function updateBalance() {
+        const totalCredit = appData.credits.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+        const totalDebit = appData.debits.reduce((acc, curr) => acc + parseFloat(curr.price), 0);
+        const balance = totalCredit - totalDebit;
+        document.getElementById('totalBalance').innerText = balance.toFixed(2);
+    }
+
+    // --- CREDIT LOGIC ---
+    function toggleCreditFields() {
+        const cat = document.getElementById('creditCategory').value;
+        const memFields = document.getElementById('membershipFields');
+        memFields.style.display = (cat === 'Membership') ? 'flex' : 'none';
+    }
+
+    function addCredit() {
+        const category = document.getElementById('creditCategory').value;
+        const amount = document.getElementById('creditAmount').value;
+        const date = document.getElementById('creditDate').value;
+        const note = document.getElementById('creditNote').value;
+        
+        let details = note;
+        if(category === 'Membership') {
+            const mMonth = document.getElementById('memMonth').value;
+            const mQty = document.getElementById('memQty').value;
+            details = `Month: ${mMonth}, Qty: ${mQty} | ${note}`;
+        }
+
+        if(!amount || !date) { alert("Please fill required fields"); return; }
+
+        appData.credits.push({
+            id: Date.now(),
+            date, category, amount, details
+        });
+        
+        // Clear inputs
+        document.getElementById('creditAmount').value = '';
+        document.getElementById('creditNote').value = '';
+        saveData();
+    }
+
+    function renderCredits() {
+        const tbody = document.querySelector('#creditTable tbody');
+        tbody.innerHTML = '';
+        appData.credits.slice().reverse().forEach((item, index) => {
+            const tr = `<tr>
+                <td>${item.date}</td>
+                <td>${item.category}</td>
+                <td>${item.details}</td>
+                <td style="color:green; font-weight:bold;">+${item.amount}</td>
+                <td><button class="delete-btn" onclick="deleteItem('credits', ${item.id})">X</button></td>
+            </tr>`;
+            tbody.innerHTML += tr;
+        });
+    }
+
+    // --- DEBIT LOGIC ---
+    function addDebit() {
+        const name = document.getElementById('debName').value;
+        const source = document.getElementById('debSource').value;
+        const qty = document.getElementById('debQty').value;
+        const price = document.getElementById('debPrice').value;
+        const date = document.getElementById('debDate').value;
+        const fileInput = document.getElementById('debImg');
+
+        if(!name || !price || !date) { alert("Please fill required fields"); return; }
+
+        const processDebit = (imgBase64) => {
+            appData.debits.push({
+                id: Date.now(),
+                date, name, source, qty, price, img: imgBase64
+            });
+            
+            // Clear inputs
+            document.getElementById('debName').value = '';
+            document.getElementById('debPrice').value = '';
+            fileInput.value = '';
+            saveData();
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                processDebit(e.target.result);
+            };
+            // Safety check for size (limit to ~500KB to prevent LS crash)
+            if(fileInput.files[0].size > 500000) {
+                alert("Image is too large. Please use an image under 500KB or it won't save.");
+                return;
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            processDebit('');
+        }
+    }
 
-        // AUTH
-        document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
-        window.doLogout = () => signOut(auth);
+    function renderDebits() {
+        const tbody = document.querySelector('#debitTable tbody');
+        tbody.innerHTML = '';
+        appData.debits.slice().reverse().forEach((item) => {
+            const imgHtml = item.img ? `<img src="${item.img}" class="thumb-img" onclick="window.open('${item.img}')">` : 'No Img';
+            const tr = `<tr>
+                <td>${item.date}</td>
+                <td>${item.name}</td>
+                <td>${item.source || '-'}</td>
+                <td>${item.qty || 1}</td>
+                <td style="color:red; font-weight:bold;">-${item.price}</td>
+                <td>${imgHtml}</td>
+                <td><button class="delete-btn" onclick="deleteItem('debits', ${item.id})">X</button></td>
+            </tr>`;
+            tbody.innerHTML += tr;
+        });
+    }
 
-        onAuthStateChanged(auth, (user) => {
-            if(user) {
-                document.getElementById('login-view').style.display = 'none';
-                document.getElementById('app-view').style.display = 'block';
-                initData();
-            } else {
-                document.getElementById('login-view').style.display = 'block';
-                document.getElementById('app-view').style.display = 'none';
+    // --- DIET LOGIC ---
+    function renderDiet() {
+        const container = document.getElementById('dietList');
+        container.innerHTML = '';
+        
+        // Sort by time
+        appData.diet.sort((a,b) => a.time.localeCompare(b.time));
+
+        const today = new Date().toDateString();
+        // Check if day changed to reset checks (simple logic: store last checked date)
+        const lastDate = localStorage.getItem('lastDietDate');
+        if(lastDate !== today) {
+            appData.diet.forEach(d => d.done = false);
+            localStorage.setItem('lastDietDate', today);
+            saveData(); // Save reset state
+        }
+
+        appData.diet.forEach((item) => {
+            const div = document.createElement('div');
+            div.className = 'diet-item';
+            div.innerHTML = `
+                <div class="diet-info ${item.done ? 'done' : ''}">
+                    <strong>${item.time}</strong>
+                    <span>${item.name}</span>
+                </div>
+                <div class="diet-status ${item.done ? 'done' : ''}">
+                    <label>Done? <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDiet(${item.id})"></label>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function addDietItem() {
+        const time = document.getElementById('dietTime').value;
+        const name = document.getElementById('dietName').value;
+        if(!time || !name) return;
+        
+        appData.diet.push({ id: Date.now(), time, name, done: false });
+        saveData();
+    }
+
+    function toggleDiet(id) {
+        const item = appData.diet.find(d => d.id === id);
+        if(item) {
+            item.done = !item.done;
+            saveData();
+        }
+    }
+
+    // --- SHARED FUNCTIONS ---
+    function deleteItem(type, id) {
+        if(confirm("Are you sure?")) {
+            appData[type] = appData[type].filter(i => i.id !== id);
+            saveData();
+        }
+    }
+
+    function clearAllData() {
+        if(confirm("DANGER: This will delete everything permanently!")) {
+            localStorage.removeItem('pallabLifestyleApp');
+            location.reload();
+        }
+    }
+
+    // --- NOTIFICATIONS ---
+    function requestNotificationPermission() {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                alert("Notifications enabled!");
             }
         });
+    }
 
-        // DATA LOGIC
-        function initData() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('todayDate').innerText = todayStr;
+    function checkDietTime() {
+        const now = new Date();
+        const currentHours = String(now.getHours()).padStart(2, '0');
+        const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTime = `${currentHours}:${currentMinutes}`;
 
-            // 1. LISTEN TO SALES
-            onSnapshot(collection(db, "sales"), (snap) => {
-                let todayTotal = 0;
-                const debugList = document.getElementById('debugList');
-                debugList.innerHTML = ''; // Clear list
+        appData.diet.forEach(item => {
+            if(item.time === currentTime && !item.done) {
+                sendNotification(`Time to eat: ${item.name}`, "Pallab, stick to your schedule!");
+            }
+        });
+    }
 
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    // Show in Debug list
-                    const li = document.createElement('li');
-                    li.innerText = `Found Sale: Date=${d.date}, Amount=${d.pharma + d.nonPharma}`;
-                    debugList.appendChild(li);
+    function sendNotification(title, body) {
+        if (Notification.permission === "granted") {
+            new Notification(title, { body: body });
+        }
+    }
 
-                    // Add to total if dates match
-                    if(d.date === todayStr) {
-                        todayTotal += (parseFloat(d.pharma)||0) + (parseFloat(d.nonPharma)||0);
-                    }
-                });
+    // --- EXPORT / IMPORT (CSV) ---
+    function exportToCSV(type) {
+        let data = [];
+        let filename = `${type}_data.csv`;
+        let csvContent = "data:text/csv;charset=utf-8,";
 
-                document.getElementById('dispSales').innerText = "₹" + todayTotal;
-                if(snap.empty) debugList.innerHTML = "<li>No sales data found in database. Add some in Admin!</li>";
+        if(type === 'credit') {
+            csvContent += "Date,Category,Details,Amount\n";
+            appData.credits.forEach(row => {
+                csvContent += `${row.date},${row.category},"${row.details}",${row.amount}\n`;
             });
-
-            // 2. LISTEN TO DELIVERIES
-            onSnapshot(collection(db, "deliveries"), (snap) => {
-                let count = 0;
-                snap.forEach(doc => {
-                    if(doc.data().status === 'Pending') count++;
-                });
-                document.getElementById('dispDelivery').innerText = count;
+        } else if (type === 'debit') {
+            csvContent += "Date,Product,Source,Qty,Price\n";
+            appData.debits.forEach(row => {
+                csvContent += `${row.date},"${row.name}","${row.source}",${row.qty},${row.price}\n`;
+            });
+        } else if (type === 'diet') {
+            csvContent += "Time,Food Name\n";
+            appData.diet.forEach(row => {
+                csvContent += `${row.time},"${row.name}"\n`;
             });
         }
-    </script>
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function importData() {
+        const fileInput = document.getElementById('importFile');
+        const importType = document.getElementById('importType').value;
+        
+        if (!fileInput.files.length) { alert("Please select a CSV file."); return; }
+        
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const rows = text.split('\n');
+            let count = 0;
+
+            // Skip header (index 0)
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row) continue;
+                
+                // Simple CSV parse (handling quotes roughly)
+                const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+                const clean = (str) => str ? str.replace(/"/g, '') : '';
+
+                if (importType === 'credit' && cols.length >= 4) {
+                    appData.credits.push({
+                        id: Date.now() + i,
+                        date: clean(cols[0]),
+                        category: clean(cols[1]),
+                        details: clean(cols[2]),
+                        amount: clean(cols[3])
+                    });
+                    count++;
+                } else if (importType === 'debit' && cols.length >= 5) {
+                    appData.debits.push({
+                        id: Date.now() + i,
+                        date: clean(cols[0]),
+                        name: clean(cols[1]),
+                        source: clean(cols[2]),
+                        qty: clean(cols[3]),
+                        price: clean(cols[4]),
+                        img: '' // Cannot import images from CSV easily
+                    });
+                    count++;
+                }
+            }
+            saveData();
+            alert(`Imported ${count} records successfully!`);
+        };
+        reader.readAsText(file);
+    }
+</script>
+
 </body>
 </html>
